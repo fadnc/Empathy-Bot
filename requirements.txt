@@ -1,6 +1,7 @@
 streamlit
 openai
 textblob
+transformers 
 scikit-learn
 sqlalchemy
 pandas
