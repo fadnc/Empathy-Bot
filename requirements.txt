@@ -2,8 +2,8 @@ streamlit
 openai
 textblob
 transformers 
+torch
 scikit-learn
-sqlalchemy
 pandas
 matplotlib
 cryptography
