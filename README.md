@@ -1,4 +1,4 @@
-🧠 Empathy Bot — AI-Powered Emotional Support Chat Assistant
+#🧠 Empathy Bot — AI-Powered Emotional Support Chat Assistant
 💬 Overview
 
 Empathy Bot is an intelligent conversational assistant designed to provide emotional support and detect user sentiment through text interactions.
