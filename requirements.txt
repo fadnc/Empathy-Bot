@@ -1,0 +1,8 @@
+streamlit
+openai
+textblob
+scikit-learn
+sqlalchemy
+pandas
+matplotlib
+cryptography
