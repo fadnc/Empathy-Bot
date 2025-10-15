@@ -1,0 +1,22 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+
+# Build/Distribution
+.dist/
+build/
+dist/
+
+# Environment variables
+.env
+api.env
+
+# Database
+*.db
+
+# VSCode / IDE
+.vscode/
+.idea/
