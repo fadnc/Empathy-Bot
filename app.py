@@ -13,6 +13,10 @@ from emotion_analysis import analyze_emotion
 from utils import crisis_detect, get_similar_entries
 
 import openai
+
+# ============================
+# GLOBAL EMOJI MAP
+# ============================
 EMOJI_MAP = {"happy": "😊", "sad": "😢", "angry": "😠", "neutral": "😐", "anxious": "😰", "excited": "🤩", "surprised": "😲"}
 
 # ============================
@@ -123,15 +127,15 @@ with st.sidebar:
         avg_sentiment = round(df_sidebar["sentiment"].mean(), 2)
         most_common_emotion = df_sidebar["emotion"].mode()[0] if not df_sidebar["emotion"].mode().empty else "N/A"
         last_reflection = df_sidebar.tail(1).iloc[0]["reflection"] if not df_sidebar.empty else "—"
+        last_emotion = df_sidebar.tail(1).iloc[0]["emotion"]
 
         st.metric("📝 Total Entries", total_entries)
         st.metric("🙂 Average Sentiment", avg_sentiment)
         st.metric("💖 Most Common Emotion", most_common_emotion)
 
-        # Emoji map
+        # Display last reflection with emoji
         emoji = EMOJI_MAP.get(last_emotion.lower(), '')
-        last_emotion = df_sidebar.tail(1).iloc[0]["emotion"]
-        st.markdown(f"**Last Reflection ({last_emotion})** {emoji_map.get(last_emotion.lower(), '')}")
+        st.markdown(f"**Last Reflection ({last_emotion})** {emoji}")
         st.write(f"> {last_reflection}")
 
         # Filter past entries by emotion
@@ -196,7 +200,7 @@ with tabs[0]:
                         # Reflection
                         emoji = EMOJI_MAP.get(emotion.lower(), "")
                         st.markdown(f"### 💬 {emoji} AI Reflection")
-                        st.markdown(f"<div class='reflection-output fadeIn'>“{res['reflection']}”</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div class='reflection-output fadeIn'>\"{res['reflection']}\"</div>", unsafe_allow_html=True)
                         st.info(f"**Summary:** {res['summary']} | **Tone:** {res['tone']} | **Emotion:** {emotion}")
 
                         # Follow-ups
@@ -294,4 +298,3 @@ ReflectAI is a **Generative AI-powered journaling assistant** designed for emoti
 - Crisis phrases are detected and flagged for your safety.  
 - Data is stored **locally** to protect privacy.  
 """)
-
