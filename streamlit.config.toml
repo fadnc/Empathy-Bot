@@ -1,7 +1,13 @@
 [theme]
-base="light"
-primaryColor="#8B5CF6"
-backgroundColor="#F9FAFB"
-secondaryBackgroundColor="#FFFFFF"
-textColor="#111827"
-font="sans serif"
+base = "dark"
+primaryColor = "#8B5CF6"
+backgroundColor = "#121212"
+secondaryBackgroundColor = "#1E1E2F"
+textColor = "#E5E7EB"
+font = "sans serif"
+
+[client]
+showErrorDetails = false
+
+[logger]
+level = "warning"
