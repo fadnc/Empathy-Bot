@@ -20,3 +20,6 @@ api.env
 # VSCode / IDE
 .vscode/
 .idea/
+
+# streamlit key
+.streamlit/secrets.toml
