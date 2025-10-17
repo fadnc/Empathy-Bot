@@ -8,11 +8,12 @@ import os
 
 from config import MODEL
 from database import init_db, insert_entry, load_entries
-from ai_engine import call_ollama, generate_reflection
+from ai_engine import generate_reflection
 from emotion_analysis import analyze_emotion
 from utils import crisis_detect, get_similar_entries
 
 import openai
+EMOJI_MAP = {"happy": "😊", "sad": "😢", "angry": "😠", "neutral": "😐", "anxious": "😰", "excited": "🤩", "surprised": "😲"}
 
 # ============================
 # STREAMLIT CONFIG
@@ -128,7 +129,7 @@ with st.sidebar:
         st.metric("💖 Most Common Emotion", most_common_emotion)
 
         # Emoji map
-        emoji_map = {"happy": "😊", "sad": "😢", "angry": "😠", "neutral": "😐", "anxious": "😰", "excited": "🤩", "surprised": "😲"}
+        emoji = EMOJI_MAP.get(last_emotion.lower(), '')
         last_emotion = df_sidebar.tail(1).iloc[0]["emotion"]
         st.markdown(f"**Last Reflection ({last_emotion})** {emoji_map.get(last_emotion.lower(), '')}")
         st.write(f"> {last_reflection}")
@@ -193,7 +194,7 @@ with tabs[0]:
                             st.code(res["raw_response"])
                     else:
                         # Reflection
-                        emoji = emoji_map.get(emotion.lower(), "")
+                        emoji = EMOJI_MAP.get(emotion.lower(), "")
                         st.markdown(f"### 💬 {emoji} AI Reflection")
                         st.markdown(f"<div class='reflection-output fadeIn'>“{res['reflection']}”</div>", unsafe_allow_html=True)
                         st.info(f"**Summary:** {res['summary']} | **Tone:** {res['tone']} | **Emotion:** {emotion}")
@@ -293,3 +294,4 @@ ReflectAI is a **Generative AI-powered journaling assistant** designed for emoti
 - Crisis phrases are detected and flagged for your safety.  
 - Data is stored **locally** to protect privacy.  
 """)
+
