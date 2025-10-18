@@ -253,14 +253,15 @@ with tabs[1]:
         # --- Sentiment Over Time ---
         with col1:
             st.subheader("Sentiment Over Time")
-            fig, ax = plt.subplots(figsize=(7,4))
+            fig, ax = plt.subplots(figsize=(7, 4))
             x = df.index
-            y = df["sentiment"]
+            y = df["sentiment"].reset_index(drop=True)  # Reset index to use integer positions
 
             # Color gradient based on sentiment
-            for i in range(len(x)-1):
-                color = "#22C55E" if y[i]>=0.5 else "#F59E0B" if y[i]>0 else "#EF4444"
-                ax.plot(x[i:i+2], y[i:i+2], color=color, linewidth=2)
+            for i in range(len(x) - 1):
+                color = "#22C55E" if y.iloc[i] >= 0.5 else "#F59E0B" if y.iloc[i] > 0 else "#EF4444"
+                ax.plot(x[i:i+2], y.iloc[i:i+2], color=color, linewidth=2)
+            
             ax.set_ylabel("Sentiment")
             ax.set_xlabel("Date")
             ax.set_title("")
@@ -276,7 +277,6 @@ with tabs[1]:
         # Recent Entries (full width below charts)
         st.subheader("🗂 Recent Entries")
         st.dataframe(df.tail(5).reset_index()[["timestamp", "emotion", "tone", "safety"]])
-
 
 # ============================
 # ABOUT TAB
@@ -297,4 +297,5 @@ ReflectAI is a **Generative AI-powered journaling assistant** designed for emoti
 - Crisis phrases are detected and flagged for your safety.  
 - Data is stored **locally** to protect privacy.  
 """)
+
 
