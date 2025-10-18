@@ -12,7 +12,7 @@ from ai_engine import generate_reflection
 from emotion_analysis import analyze_emotion
 from utils import crisis_detect, get_similar_entries
 
-import openai
+import google.generativeai as genai
 
 # ============================
 # GLOBAL EMOJI MAP
@@ -111,7 +111,6 @@ st.markdown("""
 <div class="sub-title fadeIn">Your AI-Powered Reflective Journaling Companion</div>
 """, unsafe_allow_html=True)
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
 init_db()
 
 # ============================
@@ -298,3 +297,4 @@ ReflectAI is a **Generative AI-powered journaling assistant** designed for emoti
 - Crisis phrases are detected and flagged for your safety.  
 - Data is stored **locally** to protect privacy.  
 """)
+
