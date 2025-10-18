@@ -51,15 +51,16 @@ def call_gemini(prompt):
     genai.configure(api_key=api_key)
     
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
-                response_mime_type="application/json"
-            )
-        )
+        model = genai.GenerativeModel("gemini-pro")
+        response = model.generate_content(prompt)
         response_text = response.text.strip()
-        return json.loads(response_text)
+        
+        # Extract JSON if response contains extra text
+        json_str = _extract_json(response_text)
+        if json_str:
+            return json.loads(json_str)
+        else:
+            return json.loads(response_text)
     except json.JSONDecodeError as e:
         print(f"⚠️ JSON parsing error from Gemini: {e}")
         return {"error": f"Failed to parse Gemini response as JSON: {e}"}
