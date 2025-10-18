@@ -2,18 +2,25 @@ import subprocess
 import json
 import re
 import os
-import openai
+import google.generativeai as genai
 from config import MODEL
 
 def _extract_json(text):
-    """Extract JSON from potentially messy text."""
+    """
+    Extracts a JSON object from a string, even if it's embedded in other text
+    or markdown.
+    """
     match = re.search(r'\{.*\}', text, re.DOTALL)
     if match:
         return match.group(0)
     return None
 
+
 def call_ollama(prompt, context=None):
-    """Try local Ollama, return None if unavailable."""
+    """
+    Calls the local Ollama model 'gemma3:1b' for text generation.
+    Returns None if Ollama is not available.
+    """
     combined_prompt = prompt if not context else f"Context:\n{context}\n\nUser:\n{prompt}"
     
     try:
@@ -29,33 +36,43 @@ def call_ollama(prompt, context=None):
         )
         return result.stdout.strip()
     except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
-        print("⚠️ Ollama not available, using OpenAI...")
+        print("⚠️ Ollama not available, using Gemini...")
         return None
 
-def call_openai(prompt):
-    """Call OpenAI API."""
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        return {"error": "OPENAI_API_KEY environment variable not set."}
 
-    client = openai.OpenAI(api_key=api_key)
+def call_gemini(prompt):
+    """
+    Calls the Google Gemini API for text generation.
+    """
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        return {"error": "GEMINI_API_KEY environment variable not set."}
+
+    genai.configure(api_key=api_key)
+    
     try:
-        response = client.chat.completions.create(
-            model=MODEL,
-            messages=[
-                {"role": "system", "content": "You are an empathetic reflection generator. Return only a valid JSON object."},
-                {"role": "user", "content": prompt}
-            ],
-            response_format={"type": "json_object"}
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                response_mime_type="application/json"
+            )
         )
-        response_content = response.choices[0].message.content
-        return json.loads(response_content)
+        response_text = response.text.strip()
+        return json.loads(response_text)
+    except json.JSONDecodeError as e:
+        print(f"⚠️ JSON parsing error from Gemini: {e}")
+        return {"error": f"Failed to parse Gemini response as JSON: {e}"}
     except Exception as e:
-        print(f"⚠️ Error calling OpenAI: {e}")
-        return {"error": f"Failed to get response from OpenAI: {e}"}
+        print(f"⚠️ Error calling Gemini: {e}")
+        return {"error": f"Failed to get response from Gemini: {e}"}
+
 
 def generate_reflection(user_input):
-    """Generate reflection with Ollama fallback to OpenAI."""
+    """
+    Generates an empathetic reflection, summary, and follow-up questions.
+    Falls back to Gemini if Ollama is unavailable.
+    """
     prompt = f"""
 You are an empathetic reflection generator.
 
@@ -110,8 +127,26 @@ User: {user_input}
                 raise json.JSONDecodeError("No JSON found", response, 0)
             return json.loads(json_str)
         except json.JSONDecodeError:
-            print("⚠️ Ollama returned invalid JSON. Falling back to OpenAI...")
+            print("⚠️ Ollama returned invalid JSON. Falling back to Gemini...")
     
-    # Fall back to OpenAI (cloud deployment)
-    print("✓ Using OpenAI API\n")
-    return call_openai(prompt)
+    # Fall back to Gemini (cloud deployment)
+    print("✓ Using Google Gemini API\n")
+    return call_gemini(prompt)
+
+
+# Example interaction
+if __name__ == "__main__":
+    user_input = "I've been feeling really alone lately. Even when I talk to people, it feels like they don't really get me."
+    
+    reflection_data = generate_reflection(user_input)
+    print("\n🪞 Reflection Output:")
+    print(json.dumps(reflection_data, indent=2, ensure_ascii=False))
+
+    print("\n✨ Summary")
+    print("Generated via Ollama (local) or Gemini (fallback)\n")
+
+    if isinstance(reflection_data, dict) and "followups" in reflection_data:
+        print("Follow-up Questions")
+        for item in reflection_data["followups"]:
+            print(f"• {item['question']}")
+            print(f"  ↳ {item['follow_up']}")
