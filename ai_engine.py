@@ -52,8 +52,8 @@ def call_gemini(prompt):
     genai.configure(api_key=api_key)
     
     try:
-        # Use gemini-2.5-flash (latest stable model)
-        model = genai.GenerativeModel("gemini-2.5-flash")
+        # Use gemini-2.5-flash (latest stable model available)
+        model = genai.GenerativeModel("models/gemini-2.5-flash")
         response = model.generate_content(prompt)
         response_text = response.text.strip()
         
