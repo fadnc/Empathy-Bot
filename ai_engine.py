@@ -43,6 +43,7 @@ def call_ollama(prompt, context=None):
 def call_gemini(prompt):
     """
     Calls the Google Gemini API for text generation.
+    Uses gemini-2.5-flash (latest available model).
     """
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
@@ -51,7 +52,8 @@ def call_gemini(prompt):
     genai.configure(api_key=api_key)
     
     try:
-        model = genai.GenerativeModel("gemini-pro")
+        # Use gemini-2.5-flash (latest stable model)
+        model = genai.GenerativeModel("gemini-2.5-flash")
         response = model.generate_content(prompt)
         response_text = response.text.strip()
         
