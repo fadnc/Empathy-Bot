@@ -181,7 +181,7 @@ with tabs[0]:
         placeholder="Write freely — ReflectAI listens without judgment..."
     )
 
-    if st.button("✨ Generate Reflection", use_container_width=True):
+    if st.button("✨ Generate Reflection", width="stretch"):
         if not entry.strip():
             st.warning("Please write something first.")
         else:
