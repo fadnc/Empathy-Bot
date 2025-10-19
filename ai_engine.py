@@ -6,10 +6,7 @@ import google.generativeai as genai
 from config import MODEL
 
 def _extract_json(text):
-    """
-    Extracts a JSON object from a string, even if it's embedded in other text
-    or markdown.
-    """
+    """Extract JSON from potentially messy text."""
     match = re.search(r'\{.*\}', text, re.DOTALL)
     if match:
         return match.group(0)
@@ -17,10 +14,7 @@ def _extract_json(text):
 
 
 def call_ollama(prompt, context=None):
-    """
-    Calls the local Ollama model 'gemma3:1b' for text generation.
-    Returns None if Ollama is not available.
-    """
+    """Try local Ollama, return None if unavailable."""
     combined_prompt = prompt if not context else f"Context:\n{context}\n\nUser:\n{prompt}"
     
     try:
@@ -35,16 +29,12 @@ def call_ollama(prompt, context=None):
             timeout=30
         )
         return result.stdout.strip()
-    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
-        print("⚠️ Ollama not available, using Gemini...")
+    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
         return None
 
 
 def call_gemini(prompt):
-    """
-    Calls the Google Gemini API for text generation.
-    Uses gemini-2.5-flash (latest available model).
-    """
+    """Call Google Gemini API."""
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         return {"error": "GEMINI_API_KEY environment variable not set."}
@@ -52,74 +42,121 @@ def call_gemini(prompt):
     genai.configure(api_key=api_key)
     
     try:
-        # Use gemini-2.5-flash (latest stable model available)
         model = genai.GenerativeModel("models/gemini-2.5-flash")
         response = model.generate_content(prompt)
         response_text = response.text.strip()
         
-        # Extract JSON if response contains extra text
         json_str = _extract_json(response_text)
         if json_str:
             return json.loads(json_str)
         else:
             return json.loads(response_text)
     except json.JSONDecodeError as e:
-        print(f"⚠️ JSON parsing error from Gemini: {e}")
-        return {"error": f"Failed to parse Gemini response as JSON: {e}"}
+        return {"error": f"Failed to parse response: {e}"}
     except Exception as e:
-        print(f"⚠️ Error calling Gemini: {e}")
         return {"error": f"Failed to get response from Gemini: {e}"}
 
 
-def generate_reflection(user_input):
+def build_contextual_prompt(user_input, emotion, sentiment, past_patterns=None):
     """
-    Generates an empathetic reflection, summary, and follow-up questions.
-    Falls back to Gemini if Ollama is unavailable.
+    Builds a smarter prompt based on detected emotion and sentiment.
+    Includes context-specific follow-up questions.
     """
+    
+    # Determine prompt style based on emotion/sentiment
+    if sentiment < -0.7:
+        tone_instruction = "Use an extra compassionate, grounding tone. Focus on safety and immediate coping."
+    elif sentiment < -0.3:
+        tone_instruction = "Use a warm, validating tone. Help them see small positive steps they can take."
+    elif sentiment < 0.3:
+        tone_instruction = "Use a balanced, curious tone. Help them explore what they're experiencing."
+    else:
+        tone_instruction = "Use an encouraging, reinforcing tone. Help them build on this positive momentum."
+    
+    # Context-specific follow-ups
+    followup_context = ""
+    if emotion.lower() == "lonely":
+        followup_context = "Focus follow-ups on connection: relationships, reaching out, community."
+    elif emotion.lower() == "anxious" or emotion.lower() == "overwhelmed":
+        followup_context = "Focus follow-ups on breaking things down into manageable steps and grounding techniques."
+    elif emotion.lower() == "ashamed" or emotion.lower() == "grieving":
+        followup_context = "Focus follow-ups on self-compassion and processing feelings."
+    elif emotion.lower() == "joyful" or emotion.lower() == "hopeful":
+        followup_context = "Focus follow-ups on sustaining this momentum and understanding what contributed."
+    elif emotion.lower() == "frustrated" or emotion.lower() == "angry":
+        followup_context = "Focus follow-ups on understanding the source and healthy expression."
+    
     prompt = f"""
-You are an empathetic reflection generator.
+You are a compassionate, non-judgmental emotional support companion. Your role is to help users reflect deeply on their emotions and find actionable insights.
 
-User input:
+{tone_instruction}
+
+User's emotional state: {emotion} (sentiment score: {sentiment:.2f})
+{followup_context}
+
+User's journal entry:
 \"\"\"{user_input}\"\"\"
 
-Return only a valid JSON object — do not include any explanation, notes, or extra text.
+Generate a helpful response with this exact JSON format (no extra text):
 
-Required keys:
-- reflection: A deeply empathetic reflection (2–3 sentences).
-- summary: One-line summary of user emotion/theme.
-- followups: A list of exactly 2 follow-up objects, each containing:
-  {{
-    "question": "A supportive open-ended follow-up question",
-    "follow_up": "A helpful suggestion or reasoning for asking that question"
-  }}
-- tone: Describe the tone used (e.g., warm, gentle, supportive, hopeful).
-- safety_flag: true if input shows distress/risk, false otherwise.
-
-Example (strict format):
 {{
-  "reflection": "It sounds like you're feeling overwhelmed but still trying your best.",
-  "summary": "Feeling emotionally exhausted but resilient.",
+  "reflection": "A 2-3 sentence empathetic reflection that validates their feelings and shows you understand. If sentiment is very low, include a grounding element.",
+  "summary": "One-line summary capturing the core emotion/theme.",
+  "actionable_insight": "A brief, practical suggestion they could try (not therapy advice, just small actionable steps like 'reach out to one person' or 'go for a 5-min walk').",
   "followups": [
     {{
-      "question": "What usually helps you recharge when you feel this way?",
-      "follow_up": "Encourages self-awareness of coping methods."
+      "question": "A deeply thoughtful follow-up question tailored to their specific situation and emotion",
+      "follow_up": "Why this question matters for their emotional growth"
     }},
     {{
-      "question": "Would you like to talk about what's been the hardest part lately?",
-      "follow_up": "Promotes openness and deeper reflection."
+      "question": "A second follow-up that explores either what led to this or what could help them move forward",
+      "follow_up": "The psychological principle or insight behind this question"
     }}
   ],
-  "tone": "warm",
-  "safety_flag": false
+  "tone": "Description of the tone used (e.g., warm and grounding, gently challenging, celebratory)",
+  "safety_flag": true/false,
+  "coping_suggestion": "If sentiment < -0.3: suggest a grounding or coping technique (5-4-3-2-1 technique, deep breathing, etc.). Otherwise null."
 }}
 
-Now generate the JSON response based on the user's input below:
-User: {user_input}
+Example for anxious entry:
+{{
+  "reflection": "It sounds like you're caught in a cycle of worry and uncertainty. That's a completely understandable response to feeling out of control.",
+  "summary": "Overwhelmed by things beyond your control",
+  "actionable_insight": "Try identifying just one thing you CAN control today and focus on that for 10 minutes",
+  "followups": [
+    {{
+      "question": "What's one small thing that's actually within your control right now?",
+      "follow_up": "Helps shift focus from overwhelming unknowns to what you can influence"
+    }},
+    {{
+      "question": "When did this feeling start, and was there a specific trigger?",
+      "follow_up": "Understanding the origin helps address the root cause vs. just the symptoms"
+    }}
+  ],
+  "tone": "calm and grounding, gently refocusing",
+  "safety_flag": false,
+  "coping_suggestion": "Try the 5-4-3-2-1 grounding technique: name 5 things you see, 4 you hear, 3 you touch, 2 you smell, 1 you taste"
+}}
 """
+    
+    return prompt
 
+
+def generate_reflection(user_input, emotion=None, sentiment=None, past_patterns=None):
+    """
+    Generates contextual reflection with smart follow-ups based on emotion.
+    Falls back to Gemini if Ollama unavailable.
+    """
+    # If emotion/sentiment not provided, analyze them first
+    if emotion is None or sentiment is None:
+        from emotion_analysis import analyze_emotion
+        sentiment, emotion = analyze_emotion(user_input)
+    
+    prompt = build_contextual_prompt(user_input, emotion, sentiment, past_patterns)
+    
     print("\n🧠 Generating empathetic reflection...\n")
     
-    # Try Ollama first (local development)
+    # Try Ollama first
     response = call_ollama(prompt)
     
     if response:
@@ -132,24 +169,6 @@ User: {user_input}
         except json.JSONDecodeError:
             print("⚠️ Ollama returned invalid JSON. Falling back to Gemini...")
     
-    # Fall back to Gemini (cloud deployment)
+    # Fall back to Gemini
     print("✓ Using Google Gemini API\n")
     return call_gemini(prompt)
-
-
-# Example interaction
-if __name__ == "__main__":
-    user_input = "I've been feeling really alone lately. Even when I talk to people, it feels like they don't really get me."
-    
-    reflection_data = generate_reflection(user_input)
-    print("\n🪞 Reflection Output:")
-    print(json.dumps(reflection_data, indent=2, ensure_ascii=False))
-
-    print("\n✨ Summary")
-    print("Generated via Ollama (local) or Gemini (fallback)\n")
-
-    if isinstance(reflection_data, dict) and "followups" in reflection_data:
-        print("Follow-up Questions")
-        for item in reflection_data["followups"]:
-            print(f"• {item['question']}")
-            print(f"  ↳ {item['follow_up']}")
