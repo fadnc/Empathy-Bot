@@ -1,36 +1,63 @@
 from textblob import TextBlob
 from transformers import pipeline
 
-# Use a pipeline for zero-shot classification. This is more flexible.
-# The model is downloaded and cached automatically on first run.
+# Use a pipeline for zero-shot classification
 emotion_classifier = pipeline(
     "zero-shot-classification",
     model="facebook/bart-large-mnli"
 )
 
-EMOTION_LABELS = ["joy", "sadness", "anger", "fear", "surprise", "love", "neutral"]
+# More granular, mental-health-focused emotion labels
+EMOTION_LABELS = [
+    "anxious", "overwhelmed", "lonely", "ashamed", "grieving",
+    "joyful", "content", "frustrated", "hopeful", "angry",
+    "confused", "unmotivated", "stressed", "peaceful", "neutral"
+]
 
 def analyze_emotion(text):
     """
-    Analyzes the sentiment of a text and categorizes it into a more
-    granular emotion label.
-    granular emotion label using a zero-shot classification model.
+    Analyzes sentiment polarity and categorizes into granular emotion labels
+    more relevant to emotional well-being tracking.
     """
+    # Get sentiment polarity (-1 to 1)
     sentiment = TextBlob(text).sentiment.polarity
-    if sentiment > 0.6:
-        emotion = "Very Positive"
-    elif sentiment > 0.1:
-        emotion = "Positive"
-    elif sentiment < -0.6:
-        emotion = "Very Negative"
-    elif sentiment < -0.1:
-        emotion = "Slightly Negative"
-    else:
-        emotion = "Neutral"
-
-    # Get a more specific emotion
+    
+    # Get more specific emotion using zero-shot classification
     result = emotion_classifier(text, EMOTION_LABELS, multi_label=False)
-    # The top label is the most likely emotion
     emotion = result['labels'][0].capitalize()
-
+    
     return sentiment, emotion
+
+
+def get_emotion_category(emotion):
+    """
+    Groups emotions into broader categories for pattern analysis.
+    Returns: 'positive', 'negative', 'neutral'
+    """
+    positive_emotions = ["joyful", "content", "hopeful", "peaceful"]
+    negative_emotions = ["anxious", "overwhelmed", "lonely", "ashamed", "grieving", "frustrated", "angry", "stressed", "unmotivated", "confused"]
+    
+    if emotion.lower() in positive_emotions:
+        return "positive"
+    elif emotion.lower() in negative_emotions:
+        return "negative"
+    else:
+        return "neutral"
+
+
+def get_emotion_severity(sentiment):
+    """
+    Maps sentiment to severity level for better crisis assessment.
+    Returns: 'critical' (-1 to -0.7), 'high' (-0.7 to -0.3), 
+             'moderate' (-0.3 to 0.3), 'good' (0.3 to 0.7), 'excellent' (0.7 to 1)
+    """
+    if sentiment <= -0.7:
+        return "critical"
+    elif sentiment <= -0.3:
+        return "high"
+    elif sentiment <= 0.3:
+        return "moderate"
+    elif sentiment <= 0.7:
+        return "good"
+    else:
+        return "excellent"
