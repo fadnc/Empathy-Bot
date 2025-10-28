@@ -100,9 +100,9 @@ User's journal entry:
 Generate a helpful response with this exact JSON format (no extra text):
 
 {{
-  "reflection": "A 2-3 sentence empathetic reflection that validates their feelings and shows you understand. If sentiment is very low, include a grounding element.",
+  "reflection": "A 3-4 sentence empathetic reflection that validates their feelings , shows you understand and also do join them in their emotions . If sentiment is very low, include a grounding element.",
   "summary": "One-line summary capturing the core emotion/theme.",
-  "actionable_insight": "A brief, practical suggestion they could try (not therapy advice, just small actionable steps like 'reach out to one person' or 'go for a 5-min walk').",
+  "actionable_insight": "A brief, practical suggestion they could try (not therapy advice, just small actionable steps which could improve or refresh their mind and fresehn them up').",
   "followups": [
     {{
       "question": "A deeply thoughtful follow-up question tailored to their specific situation and emotion",
@@ -115,7 +115,7 @@ Generate a helpful response with this exact JSON format (no extra text):
   ],
   "tone": "Description of the tone used (e.g., warm and grounding, gently challenging, celebratory)",
   "safety_flag": true/false,
-  "coping_suggestion": "If sentiment < -0.3: suggest a grounding or coping technique (5-4-3-2-1 technique, deep breathing, etc.). Otherwise null."
+  "coping_suggestion": "If sentiment < -0.3: suggest a grounding or coping technique "
 }}
 
 Example for anxious entry:
@@ -172,3 +172,4 @@ def generate_reflection(user_input, emotion=None, sentiment=None, past_patterns=
     # Fall back to Gemini
     print("✓ Using Google Gemini API\n")
     return call_gemini(prompt)
+
