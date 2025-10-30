@@ -1,6 +1,6 @@
-# 🧠 ReflectAI — AI-Powered Reflective Journaling Companion
+#  ReflectAI — AI-Powered Reflective Journaling Companion
 
-## 💬 Overview
+##  Overview
 
 ReflectAI is an intelligent journaling application designed to provide emotional support and help users track their emotional well-being through AI-powered reflection. It combines sentiment analysis, emotion detection, and empathetic AI responses to help users understand their emotional patterns over time.
 
@@ -10,7 +10,7 @@ Built with Python and Streamlit, ReflectAI works both locally and deploys seamle
 
 ---
 
-## 🚀 Key Features
+##  Key Features
 
 - **Emotion & Sentiment Analysis:** Detects emotions and sentiment polarity from journal entries using transformer-based NLP models
 - **Empathetic AI Reflections:** Generates thoughtful, compassionate reflections on your entries using Google Gemini API (with local Ollama fallback)
@@ -23,7 +23,7 @@ Built with Python and Streamlit, ReflectAI works both locally and deploys seamle
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 | Component | Technology |
 |-----------|------------|
@@ -37,7 +37,7 @@ Built with Python and Streamlit, ReflectAI works both locally and deploys seamle
 
 ---
 
-## 📋 Project Structure
+##  Project Structure
 
 ```
 empathy-bot/
@@ -57,7 +57,7 @@ empathy-bot/
 
 ---
 
-## 🚀 Installation & Setup
+##  Installation & Setup
 
 ### Prerequisites
 - Python 3.10 or higher
@@ -119,7 +119,7 @@ The app will open at: **http://localhost:8501**
 
 ---
 
-## 🌐 Deployment on Streamlit Cloud
+##  Deployment on Streamlit Cloud
 
 ### Steps
 
@@ -152,7 +152,7 @@ The app will open at: **http://localhost:8501**
 ### Writing a Journal Entry
 1. Click the **"📝 Journal"** tab
 2. Write your thoughts freely in the text area
-3. Click **"✨ Generate Empathetic Reflection"**
+3. Click **" Generate Empathetic Reflection"**
 4. Receive AI-generated reflection, summary, and follow-up questions
 5. Your entry is automatically saved with sentiment and emotion labels
 
@@ -165,7 +165,7 @@ The sidebar shows:
 - **Filter by Emotion:** Browse past entries by emotion type
 
 ### Analytics
-Click the **"📊 Analytics"** tab to see:
+Click the **" Analytics"** tab to see:
 - **Sentiment Over Time:** Line chart showing emotional trends (color-coded)
 - **Emotion Distribution:** Bar chart of emotion frequencies
 - **Recent Entries:** Table of your last 5 entries with metadata
@@ -175,7 +175,7 @@ After generating a reflection, the app shows past entries with similar themes us
 
 ---
 
-## 🔐 Security & Privacy
+##  Security & Privacy
 
 - **Local-First Data:** All entries stored locally in SQLite (not sent to servers unless you deploy)
 - **API Keys:** Never committed to GitHub; stored in `.env` (local) or Streamlit Secrets (cloud)
@@ -184,7 +184,7 @@ After generating a reflection, the app shows past entries with similar themes us
 
 ---
 
-## ⚠️ Important Notes
+##  Important Notes
 
 **This is NOT a replacement for therapy or professional mental health support.**
 
@@ -195,7 +195,7 @@ After generating a reflection, the app shows past entries with similar themes us
 
 ---
 
-## 🧠 How the AI Works
+##  How the AI Works
 
 ### Reflection Generation
 1. Your entry is sent to Google Gemini API (or local Ollama)
@@ -218,7 +218,7 @@ After generating a reflection, the app shows past entries with similar themes us
 
 ---
 
-## 🔧 Configuration
+##  Configuration
 
 Edit `config.py` to customize:
 
@@ -230,7 +230,7 @@ CRISIS_WORDS = [...]               # Crisis detection keywords
 
 ---
 
-## 📦 Dependencies
+##  Dependencies
 
 All dependencies are listed in `requirements.txt`:
 - `streamlit` - Web framework
@@ -245,7 +245,7 @@ All dependencies are listed in `requirements.txt`:
 
 ---
 
-## 🚧 Future Enhancements
+##  Future Enhancements
 
 - **Voice Journaling:** Support audio input with transcription
 - **Export Features:** Download journal as PDF or CSV
@@ -258,7 +258,7 @@ All dependencies are listed in `requirements.txt`:
 
 ---
 
-## 🤝 Contributing
+##  Contributing
 
 Contributions are welcome! To contribute:
 
@@ -270,13 +270,13 @@ Contributions are welcome! To contribute:
 
 ---
 
-## 📝 License
+##  License
 
 This project is licensed under the **MIT License** — free to use, modify, and distribute with attribution. See the LICENSE file for details.
 
 ---
 
-## 👨‍💻 Author
+##  Author
 
 **Fadhil Muhammed N C**  
 *MSc Computer Science (Data Analytics)*  
@@ -284,7 +284,7 @@ This project is licensed under the **MIT License** — free to use, modify, and 
 
 ---
 
-## 📞 Support
+##  Support
 
 For issues, feature requests, or questions:
 - Open an issue on GitHub
@@ -293,7 +293,7 @@ For issues, feature requests, or questions:
 
 ---
 
-## ❤️ Acknowledgments
+##  Acknowledgments
 
 - Google Gemini API for empathetic response generation
 - Ollama for local LLM support
